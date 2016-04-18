@@ -1,0 +1,16 @@
+encoding "utf8";
+import "base.proto";
+import "articles_base.proto";
+import "iron.gzt";
+TAuxDicArticle "прилагательные"
+{
+	  key = {"tomita:iron_adj.cxx", type=CUSTOM}
+}
+TAuxDicArticle "левые_глаголы"
+{
+	  key = {"tomita:iron_verb_left.cxx", type=CUSTOM}
+}
+TAuxDicArticle "правые_глаголы"
+{
+	  key = {"tomita:iron_verb_right.cxx", type=CUSTOM}
+}

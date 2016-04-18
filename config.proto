@@ -1,0 +1,18 @@
+encoding "utf8";
+TTextMinerConfig {
+ Dictionary = "dic.gzt"; 
+ PrettyOutput = "PrettyOutput.html"; 
+
+ Input = {
+ File = "input.txt"; 
+ }
+ Articles = [
+{ Name = "прилагательные";} 
+{ Name = "левые_глаголы";}
+{ Name = "правые_глаголы";}
+ ]
+ Output = {
+  File = "res.txt";
+  Format = text;
+  }
+ }
