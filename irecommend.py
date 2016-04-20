@@ -78,7 +78,8 @@ for i, model in enumerate(model_links):
     print(revs)
     if len(revs) == 0:
         print("Stopped at %d" % i)
-        pickle.dump(all_revs, open("irecommend_links_(%d_%d].p" % (start, i), "wb"))
+        if i != start:
+            pickle.dump(all_revs, open("irecommend_links_(%d_%d].p" % (start, i), "wb"))
         break
     all_revs.extend(revs)
 
