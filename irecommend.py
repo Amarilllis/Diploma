@@ -6,23 +6,20 @@ import pandas as pd
 
 def gather_models(url):
     g = grab.Grab()
-    # g.setup(hammer_mode=True, hammer_timeouts=((2, 5), (10, 15), (20, 30)))
     g.go(url)
 
     links = []
     flinks = g.doc.select("//*[@id='content']/div[2]/div[2]/div/div/div[3]/a")
 
     for fl in flinks:
-        # print(fl.attr("href"))
-        # g.go(fl.attr("href"))
         links.append("http://irecommend.ru"+ fl.attr("href"))
 
     # print(links)
     return links
 
-def gather_reviews(url):
+def gather_reviews(url, proxy):
     g = grab.Grab()
-    # g.setup(hammer_mode=True, hammer_timeouts=((2, 5), (10, 15), (20, 30)))
+    g.setup(proxy=proxy)
     g.go(url)
 
     links = []
@@ -66,20 +63,18 @@ print(model_links[0])
 
 
 import time
-start = 20
+import random
+start = 156
 all_revs = []
 df = pd.DataFrame(columns=["rating", "text", "pro", "con"])
 for i, model in enumerate(model_links):
-    if i < start:
-        continue
-    if (i + 1) % 10 == 0:
-        time.sleep(30)
-    revs = gather_reviews(model)
-    print(revs)
-    if len(revs) == 0:
-        print("Stopped at %d" % i)
-        if i != start:
-            pickle.dump(all_revs, open("irecommend_links_(%d_%d].p" % (start, i), "wb"))
-        break
-    all_revs.extend(revs)
+    with open("proxy.txt", "r+") as prx:
+        num = random.randint(0, 1381)
+        proxy = prx.readlines()[num]
+        print(proxy)
+        revs = gather_reviews(model, proxy)
+        print(revs)
 
+        all_revs.extend(revs)
+
+pickle.dump(all_revs, open("irecommend_links_with_proxy.p", "wb"))
