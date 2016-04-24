@@ -19,7 +19,7 @@ def gather_models(url):
 
 def gather_reviews(url, proxy):
     g = grab.Grab()
-    g.setup(proxy=proxy)
+    # g.setup(proxy=proxy)
     g.go(url)
 
     links = []
@@ -69,12 +69,20 @@ all_revs = []
 df = pd.DataFrame(columns=["rating", "text", "pro", "con"])
 for i, model in enumerate(model_links):
     with open("proxy.txt", "r+") as prx:
-        num = random.randint(0, 1381)
-        proxy = prx.readlines()[num]
-        print(proxy)
-        revs = gather_reviews(model, proxy)
-        print(revs)
+        failed = True
+        proxylist = prx.readlines()
+        while failed:
+            # try:
+                num = random.randint(0, 1383)
+                proxy = proxylist[num]
+                print(proxy)
+                time.sleep(num % 20)
+                revs = gather_reviews(model, proxy)
+                print(revs)
 
-        all_revs.extend(revs)
+                all_revs.extend(revs)
+                failed = False
+            # except Exception:
+            #     pass
 
 pickle.dump(all_revs, open("irecommend_links_with_proxy.p", "wb"))
