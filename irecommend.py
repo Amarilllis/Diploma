@@ -34,7 +34,7 @@ def gather_reviews(url, proxy):
 def parse_review(url, df):
     x_rating = "//*[@id=\"quicktabs_tabpage_12388_myreviewinfo\"]/div/div/div[3]/div/div[1]/span"
 
-    x_text = "//*[@id=\"quicktabs_tabpage_12388_myreviewinfo\"]/div/div/div[6]/div[1]/p/text"
+    x_text = "//*[@id=\"quicktabs_tabpage_12388_myreviewinfo\"]/div/div/div[6]/div[1]/p"
 
     x_pro = "//*[@id=\"quicktabs_tabpage_12388_myreviewinfo\"]/div/div/div[5]/div[1]/span"
 
@@ -43,13 +43,13 @@ def parse_review(url, df):
     g.go(url)
 
     rating = g.doc.select(x_rating).text()
-    text = " ".join(g.doc.select(x_text).text())
-    print(text)
+    text = " ".join(g.doc.select(x_text).text_list())
+
     pro = g.doc.select(x_pro).text()
     con = g.doc.select(x_con).text()
 
-    df = df.append(pd.Series([rating, text, pro, con]),
-              index = ["rating", "text", "pro", "con"], ignore_index = True)
+    # time.sleep(120)
+    df.loc[len(df)] = [rating, text, pro, con]
     return df
 
 def get_all_models():
@@ -67,10 +67,10 @@ print(model_links[0])
 
 import time
 import random
-start = 156
-all_revs = []
+
 df = pd.DataFrame(columns=["rating", "text", "pro", "con"])
 '''
+all_revs = []
 for i, model in enumerate(model_links):
     with open("proxy.txt", "r+") as prx:
         failed = True
@@ -95,7 +95,14 @@ pickle.dump(all_revs, open("irecommend_links_with_proxy.p", "wb"))
 revlinks = pickle.load(open("irecommend_links_with_proxy.p", "rb"))
 for link in revlinks:
     print(link)
-    df = parse_review(link, df)
+    try:
+        df = parse_review(link, df)
+        print(df.head())
+        df.to_csv("irecommend.csv", sep=',', encoding='utf-8')
+        print("success")
+    except Exception:
+        pass
+    break
     time.sleep(random.randint(0, 60))
 
 df.to_csv("irecommend.csv", sep=',', encoding='utf-8')
