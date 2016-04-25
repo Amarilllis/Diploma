@@ -67,6 +67,7 @@ import random
 start = 156
 all_revs = []
 df = pd.DataFrame(columns=["rating", "text", "pro", "con"])
+'''
 for i, model in enumerate(model_links):
     with open("proxy.txt", "r+") as prx:
         failed = True
@@ -86,3 +87,12 @@ for i, model in enumerate(model_links):
             #     pass
 
 pickle.dump(all_revs, open("irecommend_links_with_proxy.p", "wb"))
+'''
+
+revlinks = pickle.load(open("irecommend_links_with_proxy.p", "rb"))
+for link in revlinks:
+    print(link)
+    parse_review(link, df)
+    time.sleep(random.randint(0, 60))
+
+df.to_csv("irecommend.csv", sep=',', encoding='utf-8')
