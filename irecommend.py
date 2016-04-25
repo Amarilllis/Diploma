@@ -32,18 +32,21 @@ def gather_reviews(url, proxy):
     return links
 
 def parse_review(url, df):
-    x_rating = "<span class='on rating' itemprop='ratingValue'>5</span>"
-    x_text = ""
-    x_pro = ""
-    x_con = ""
+    x_rating = "//*[@id=\"quicktabs_tabpage_12388_myreviewinfo\"]/div/div/div[3]/div/div[1]/span"
+
+    x_text = "//*[@id=\"quicktabs_tabpage_12388_myreviewinfo\"]/div/div/div[6]/div[1]/p/text"
+
+    x_pro = "//*[@id=\"quicktabs_tabpage_12388_myreviewinfo\"]/div/div/div[5]/div[1]/span"
+
+    x_con = "//*[@id=\"quicktabs_tabpage_12388_myreviewinfo\"]/div/div/div[5]/div[2]/span"
     g = grab.Grab()
-    g.setup(hammer_mode=True, hammer_timeouts=((2, 5), (10, 15), (20, 30)))
     g.go(url)
 
-    rating = g.doc.select(x_rating)
-    text = g.doc.select(x_text)
-    pro = g.doc.select(x_pro)
-    con = g.doc.select(x_con)
+    rating = g.doc.select(x_rating).text()
+    text = " ".join(g.doc.select(x_text).text())
+    print(text)
+    pro = g.doc.select(x_pro).text()
+    con = g.doc.select(x_con).text()
 
     df = df.append(pd.Series([rating, text, pro, con]),
               index = ["rating", "text", "pro", "con"], ignore_index = True)
