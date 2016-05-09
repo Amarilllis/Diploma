@@ -30,9 +30,9 @@ def gen_review(template, words):
 
     return review
 
+
 def gen_words():
     words = {}
-
 
     words["person"] = ["я", "я", "я", "я", "я", "муж", "мама", "родители"]
     # автор отзыва упоминается чаще, чем другие люди. потом можно сделать по-человечески с вероятностями, пока так
@@ -60,6 +60,7 @@ def gen_words():
                 gram = re.split("\[\]", raw_gram)
 
                 # потом можно научиться добавлять биграммы, это сильно повысит точность и выигрыш перед ЦМ
+                # todo: впилить согласование
                 if gram == "прилагательные":
                     words["adjective"].append(expr[-2])
 
@@ -68,7 +69,6 @@ def gen_words():
 
                 if gram == "правые_глаголы":
                     words["verb_right"].append(expr[-1])
-
 
             except Exception:
                 continue
@@ -84,5 +84,5 @@ pickle.dump(template, open("template_v1.p", "wb"))
 words = gen_words()
 pickle.dump(words, open("words_v1.p", "wb"))
 
-template = pickle.load(open("template_v1.p", "rb"))
+# template = pickle.load(open("template_v1.p", "rb"))
 # words = pickle.load(open("words_v1.p", "rb"))
