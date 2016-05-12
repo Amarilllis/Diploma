@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 __author__ = 'amarilllis'
 
 import pickle
@@ -54,7 +56,11 @@ def gen_words():
         for tr in soup.findAll('tr'):
             try:
                 l, r = tr.findAll('td')
+                print(l)
+                print(r)
                 expr = l.findAll(text=True).split()
+                print("expr:")
+                print(expr)
                 raw_gram = r.findAll(text=True)
 
                 gram = re.split("\[\]", raw_gram)
@@ -75,14 +81,16 @@ def gen_words():
 
     return words
 
-'''
+
 template = gen_template()
 pickle.dump(template, open("template_v1.p", "wb"))
 
-'''
-
 words = gen_words()
+# print(words)
 pickle.dump(words, open("words_v1.p", "wb"))
 
 # template = pickle.load(open("template_v1.p", "rb"))
 # words = pickle.load(open("words_v1.p", "rb"))
+
+rev = gen_review(template, words)
+print(rev)
