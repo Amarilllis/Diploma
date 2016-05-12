@@ -36,15 +36,15 @@ def gen_review(template, words):
 def gen_words():
     words = {}
 
-    words["person"] = ["я", "я", "я", "я", "я", "муж", "мама", "родители"]
+    words["person"] = [u"я", u"я", u"я", u"я", u"я", u"муж", u"мама", u"родители"]
     # автор отзыва упоминается чаще, чем другие люди. потом можно сделать по-человечески с вероятностями, пока так
 
     words["verb_right"] = []
     words["verb_left"] = []
 
-    words["property"] = ["мощность", "подошва",  "резервуар",  "пар", "шнур",
-            "вес", "ручка", "кабель", "накипь", "парогенератор", "утюг", "утюг",
-            "утюг", "утюг", "утюг"]
+    words["property"] = [u"мощность", u"подошва",  u"резервуар",  u"пар", u"шнур",
+            u"вес", u"ручка", u"кабель", u"накипь", u"парогенератор", u"утюг", u"утюг",
+            u"утюг", u"утюг", u"утюг"]
     # как автор, так и утюг
 
     words["adjective"] = []
@@ -56,25 +56,31 @@ def gen_words():
         for tr in soup.findAll('tr'):
             try:
                 l, r = tr.findAll('td')
-                print(l)
-                print(r)
-                expr = l.findAll(text=True).split()
-                print("expr:")
-                print(expr)
+
+                raw_expr = l.findAll(text=True)
+
+                expr = raw_expr[0].split()
+
+                # print(expr)
                 raw_gram = r.findAll(text=True)
 
-                gram = re.split("\[\]", raw_gram)
+                # print(raw_gram[0])
 
+                gram = raw_gram[0].split()[-1]
+                # print(gram)
                 # потом можно научиться добавлять биграммы, это сильно повысит точность и выигрыш перед ЦМ
                 # todo: впилить согласование
-                if gram == "прилагательные":
-                    words["adjective"].append(expr[-2])
+                if gram == u"[прилагательные]":
+                    # print("fuck")
+                    words["adjective"].append(expr[-2]).decode("utf-8")
 
-                if gram == "левые_глаголы":
-                    words["verb_left"].append(expr[-2])
+                if gram == u"[левые_глаголы]":
+                    # print("you")
+                    words["verb_left"].append(expr[-2]).decode("utf-8")
 
-                if gram == "правые_глаголы":
-                    words["verb_right"].append(expr[-1])
+                if gram == u"[правые_глаголы]":
+                    # print("python")
+                    words["verb_right"].append(expr[-1]).decode("utf-8")
 
             except Exception:
                 continue
@@ -83,10 +89,11 @@ def gen_words():
 
 
 template = gen_template()
+# print(template)
 pickle.dump(template, open("template_v1.p", "wb"))
 
 words = gen_words()
-# print(words)
+print(words)
 pickle.dump(words, open("words_v1.p", "wb"))
 
 # template = pickle.load(open("template_v1.p", "rb"))
