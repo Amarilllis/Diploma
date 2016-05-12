@@ -12,11 +12,14 @@ def gen_template():
     template = {}
 
     template["root"] = ("person", "property")
-    template["person"] = ("verb_right", "property")
+    template["person"] = ("verb_right",) #, "property")
 
-    template["verb_right"] = ("property","end")
-    template["adjective"] = ("property", "end")
-    template["property"] = ("person", "adjective", "end")
+    template["verb_right"] = ("property", "property", "property", "property",
+                              "property", "property", "property", "property", "end")
+    template["adjective"] = ("property", "property", "property", "property",
+                             "property", "property", "property", "property", "end")
+    template["property"] = ("person", "adjective", "person", "adjective",
+                            "person", "adjective", "person", "adjective", "end")
 
     return template
 
