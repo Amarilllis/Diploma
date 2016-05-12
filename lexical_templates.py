@@ -64,25 +64,19 @@ def gen_words():
 
                 expr = raw_expr[0].split()
 
-                # print(expr)
                 raw_gram = r.findAll(text=True)
 
-                # print(raw_gram[0])
-
                 gram = raw_gram[0].split()[-1]
-                # print(gram)
+
                 # потом можно научиться добавлять биграммы, это сильно повысит точность и выигрыш перед ЦМ
                 # todo: впилить согласование
                 if gram == u"[прилагательные]":
-                    # print("fuck")
                     words["adjective"].append(expr[-2]).decode("utf-8")
 
                 if gram == u"[левые_глаголы]":
-                    # print("you")
                     words["verb_left"].append(expr[-2]).decode("utf-8")
 
                 if gram == u"[правые_глаголы]":
-                    # print("python")
                     words["verb_right"].append(expr[-1]).decode("utf-8")
 
             except Exception:
