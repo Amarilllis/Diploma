@@ -8,6 +8,8 @@ from pymorphy2 import MorphAnalyzer
 from bs4 import BeautifulSoup
 import re
 
+dative_verbs = set([u"понравился", u"подарил"])
+
 def gen_template():
     template = {}
 
@@ -15,7 +17,7 @@ def gen_template():
     template["person"] = ("verb_right",) #, "property")
 
     template["verb_right"] = ("property", "property", "property", "property",
-                              "property", "property", "end", "end")
+                              "property", "property", "person", "end", "end")
     template["adjective"] = ("property", "property", "property", "property",
                              "property", "property", "end", "end")
     template["property"] = ("person", "adjective", "person", "adjective",
@@ -27,8 +29,8 @@ def gen_template():
 
 def agree(w1, w2, t1, t2):
     morph = MorphAnalyzer()
-    raw_cur_tags = morph.tag(w1)[0]
-    raw_next_tags = morph.tag(w1)[0]
+    raw_cur_tags = morph.tag(w1)[-1]
+    raw_next_tags = morph.tag(w1)[-1]
 
     # print(type(raw_cur_tags))
     # print(str(raw_cur_tags))
@@ -37,14 +39,17 @@ def agree(w1, w2, t1, t2):
 
     if t1 == "person":
         if t2 == "verb_right":
-            if next_tags[3] == "intr":
-                w1 = morph.parse(w1)[0].inflect({"nomn"}).word
-            else:
+            if w2 in dative_verbs:
                 w1 = morph.parse(w1)[0].inflect({"datv"}).word
 
     if t1 == "verb_right":
         if t2 == "property":
             pass
+        if t2 == "person":
+            if cur_tags[3] == "tran":
+                w2 = morph.parse(w2)[0].inflect({"accs"}).word
+            else:
+                w2 = morph.parse(w2)[0].inflect({"nomn"}).word
 
     if t1 == "adjective":
         if t2 == "property":
@@ -126,7 +131,6 @@ def gen_words():
 
     return words
 
-
 '''
 template = gen_template()
 
@@ -139,6 +143,8 @@ pickle.dump(words, open("words_v1.p", "wb"))
 
 template = pickle.load(open("template_v1.p", "rb"))
 words = pickle.load(open("words_v1.p", "rb"))
+
+
 
 for i in range(3):
     rev = gen_review(template, words)
