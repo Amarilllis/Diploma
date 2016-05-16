@@ -4,7 +4,7 @@ __author__ = 'amarilllis'
 
 import pickle
 import random
-import pymorphy2
+from pymorphy2 import MorphAnalyzer
 from bs4 import BeautifulSoup
 import re
 
@@ -23,15 +23,55 @@ def gen_template():
 
     return template
 
+def agree(w1, w2, t1, t2):
+    morph = MorphAnalyzer()
+    raw_cur_tags = morph.tag(w1)[0]
+    raw_next_tags = morph.tag(w1)[0]
+
+    cur_tags = re.findall(r"\w+", raw_cur_tags)
+    next_tags = re.findall(r"\w+", raw_next_tags)
+
+    if t1 == "person":
+        if t2 == "verb_right":
+            pass
+
+    if t1 == "verb_right":
+        if t2 == "property":
+            pass
+
+    if t1 == "adjective":
+        if t2 == "property":
+            pass
+
+    if t1 == "property":
+        if t2 == "person":
+            pass
+        if t2 == "adjective":
+            pass
+
+    return w1, w2
+
 def gen_review(template, words):
     review = ""
 
     cur = random.choice(template["root"])
+    cur_word = ""
 
+    cnt = -1
     while cur != "end":
         next_word = random.choice(words[cur])
-        review += next_word + " "
+
+        if cur_word == "":
+            cur_word = next_word
+            continue
+
+        cur_word, next_word = agree(cur_word, next_word, )
+
+        if cnt % 2 == 0:
+            review += cur_word + " " + next_word + " "
+
         cur = random.choice(template[cur])
+        cur_word = next_word
 
     return review
 
