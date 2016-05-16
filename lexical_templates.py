@@ -21,6 +21,8 @@ def gen_template():
     template["property"] = ("person", "adjective", "person", "adjective",
                             "person", "adjective", "person", "adjective", "end")
 
+    template["end"] = (".",)
+
     return template
 
 def agree(w1, w2, t1, t2):
@@ -33,7 +35,10 @@ def agree(w1, w2, t1, t2):
 
     if t1 == "person":
         if t2 == "verb_right":
-            pass
+            if next_tags[3] == "tran":
+                cur_tags[-1] = "nomn"
+            else:
+                cur_tags[-1] = "datv"
 
     if t1 == "verb_right":
         if t2 == "property":
@@ -49,6 +54,8 @@ def agree(w1, w2, t1, t2):
         if t2 == "adjective":
             pass
 
+
+    w1 = morph.parse(w1)[0].inflect({}).word
     return w1, w2
 
 def gen_review(template, words):
@@ -65,7 +72,7 @@ def gen_review(template, words):
             cur_word = next_word
             continue
 
-        cur_word, next_word = agree(cur_word, next_word, )
+        # cur_word, next_word = agree(cur_word, next_word, )
 
         if cnt % 2 == 0:
             review += cur_word + " " + next_word + " "
