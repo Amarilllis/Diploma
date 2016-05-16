@@ -8,7 +8,7 @@ from pymorphy2 import MorphAnalyzer
 from bs4 import BeautifulSoup
 import re
 
-dative_verbs = set([u"понравился", u"подарил"])
+dative_verbs = set([u"нравиться", u"дарить", u"советовать"])
 
 def gen_template():
     template = {}
@@ -50,10 +50,22 @@ def agree(w1, w2, t1, t2):
                 w2 = morph.parse(w2)[0].inflect({"accs"}).word
             else:
                 w2 = morph.parse(w2)[0].inflect({"nomn"}).word
+            #gender
+            w1 = morph.parse(w1)[0].inflect({next_tags[2]}).word
 
     if t1 == "adjective":
         if t2 == "property":
-            pass
+            #gender
+            print("gender:")
+
+            gender = next_tags[2]
+            if gender == "inan":
+                print("fuck)))")
+                print(w1, w2)
+                gender = next_tags[3]
+                print(gender)
+
+            w1 = morph.parse(w1)[0].inflect({gender}).word
 
     if t1 == "property":
         if t2 == "person":
@@ -94,7 +106,7 @@ def gen_words():
 
     words["property"] = [u"мощность", u"подошва",  u"резервуар",  u"пар", u"шнур",
             u"вес", u"ручка", u"кабель", u"накипь", u"парогенератор", u"утюг", u"утюг",
-            u"утюг", u"утюг", u"утюг"]
+            u"утюг", u"утюг", u"утюг", u"провод", u"инструкция"]
     # как автор, так и утюг
 
     words["adjective"] = []
