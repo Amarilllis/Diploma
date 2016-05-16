@@ -15,11 +15,11 @@ def gen_template():
     template["person"] = ("verb_right",) #, "property")
 
     template["verb_right"] = ("property", "property", "property", "property",
-                              "property", "property", "property", "property", "end")
+                              "property", "property", "end", "end")
     template["adjective"] = ("property", "property", "property", "property",
-                             "property", "property", "property", "property", "end")
+                             "property", "property", "end", "end")
     template["property"] = ("person", "adjective", "person", "adjective",
-                            "person", "adjective", "person", "adjective", "end")
+                            "person", "adjective", "end", "end")
 
     template["end"] = (".",)
 
@@ -30,15 +30,17 @@ def agree(w1, w2, t1, t2):
     raw_cur_tags = morph.tag(w1)[0]
     raw_next_tags = morph.tag(w1)[0]
 
-    cur_tags = re.findall(r"\w+", raw_cur_tags)
-    next_tags = re.findall(r"\w+", raw_next_tags)
+    # print(type(raw_cur_tags))
+    # print(str(raw_cur_tags))
+    cur_tags = re.findall(r"\w+", str(raw_cur_tags))
+    next_tags = re.findall(r"\w+", str(raw_next_tags))
 
     if t1 == "person":
         if t2 == "verb_right":
-            if next_tags[3] == "tran":
-                cur_tags[-1] = "nomn"
+            if next_tags[3] == "intr":
+                w1 = morph.parse(w1)[0].inflect({"nomn"}).word
             else:
-                cur_tags[-1] = "datv"
+                w1 = morph.parse(w1)[0].inflect({"datv"}).word
 
     if t1 == "verb_right":
         if t2 == "property":
@@ -55,38 +57,31 @@ def agree(w1, w2, t1, t2):
             pass
 
 
-    w1 = morph.parse(w1)[0].inflect({}).word
+    #w1 = morph.parse(w1)[0].inflect({}).word
     return w1, w2
 
 def gen_review(template, words):
-    review = ""
+    review = []
+    types = []
 
     cur = random.choice(template["root"])
-    cur_word = ""
 
-    cnt = -1
     while cur != "end":
-        next_word = random.choice(words[cur])
-
-        if cur_word == "":
-            cur_word = next_word
-            continue
-
-        # cur_word, next_word = agree(cur_word, next_word, )
-
-        if cnt % 2 == 0:
-            review += cur_word + " " + next_word + " "
-
+        word = random.choice(words[cur])
+        review += [word]
+        types += [cur]
         cur = random.choice(template[cur])
-        cur_word = next_word
 
-    return review
+    for i in range(1, len(review)):
+        review[i-1], review[i] = agree(review[i-1], review[i], types[i-1], types[i])
+
+    return " ".join(review)
 
 
 def gen_words():
     words = {}
 
-    words["person"] = [u"я", u"я", u"я", u"я", u"я", u"муж", u"мама", u"родители"]
+    words["person"] = [u"я", u"я", u"я", u"муж", u"мама", u"родители"]
     # автор отзыва упоминается чаще, чем другие люди. потом можно сделать по-человечески с вероятностями, пока так
 
     words["verb_right"] = []
@@ -116,7 +111,7 @@ def gen_words():
                 gram = raw_gram[0].split()[-1]
 
                 # потом можно научиться добавлять биграммы, это сильно повысит точность и выигрыш перед ЦМ
-                # todo: впилить согласование
+
                 if gram == u"[прилагательные]":
                     words["adjective"].append(expr[-2]).decode("utf-8")
 
@@ -132,16 +127,19 @@ def gen_words():
     return words
 
 
+'''
 template = gen_template()
-# print(template)
+
 pickle.dump(template, open("template_v1.p", "wb"))
 
 words = gen_words()
 print(words)
 pickle.dump(words, open("words_v1.p", "wb"))
+'''
 
-# template = pickle.load(open("template_v1.p", "rb"))
-# words = pickle.load(open("words_v1.p", "rb"))
+template = pickle.load(open("template_v1.p", "rb"))
+words = pickle.load(open("words_v1.p", "rb"))
 
-rev = gen_review(template, words)
-print(rev)
+for i in range(3):
+    rev = gen_review(template, words)
+    print(rev)
