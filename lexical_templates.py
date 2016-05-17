@@ -39,8 +39,6 @@ def agree(w1, w2, t1, t2):
     raw_cur_tags = morph.tag(w1)[-1]
     raw_next_tags = morph.tag(w1)[-1]
 
-    # print(type(raw_cur_tags))
-    # print(str(raw_cur_tags))
     cur_tags = re.findall(r"\w+", str(raw_cur_tags))
     next_tags = re.findall(r"\w+", str(raw_next_tags))
 
@@ -91,7 +89,7 @@ def gen_review(template, words):
     cur = random.choice(template["root"])
 
     while cur != "end":
-        word = random.choice(words[cur])
+        word = random.choice(words[cur[:-2]])
         review += [word]
         types += [cur]
         cur = random.choice(template[cur])
@@ -150,6 +148,7 @@ def gen_words():
 
     return words
 
+'''
 template = gen_template()
 
 pickle.dump(template, open("template_v1.p", "wb"))
@@ -161,8 +160,6 @@ pickle.dump(words, open("words_v1.p", "wb"))
 
 template = pickle.load(open("template_v1.p", "rb"))
 words = pickle.load(open("words_v1.p", "rb"))
-'''
-
 
 for i in range(3):
     rev = gen_review(template, words)
