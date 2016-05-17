@@ -8,22 +8,29 @@ from pymorphy2 import MorphAnalyzer
 from bs4 import BeautifulSoup
 import re
 
-dative_verbs = set([u"нравиться", u"дарить", u"советовать"])
+dative_verbs = set([u"нравиться", u"подарить", u"советовать", u"понравиться",
+                    u"посоветовать", u"рекомендовать", u"порекомендовать"])
 
 def gen_template():
     template = {}
 
-    template["root"] = ("person", "property")
-    template["person"] = ("verb_right",) #, "property")
+    template["root"] = ("property_1", "person_2", "property_3", "adjective_4")
 
-    template["verb_right"] = ("property", "property", "property", "property",
-                              "property", "property", "person", "end", "end")
-    template["adjective"] = ("property", "property", "property", "property",
-                             "property", "property", "end", "end")
-    template["property"] = ("person", "adjective", "person", "adjective",
-                            "person", "adjective", "end", "end")
+    template["property_1"] = ("person_1",)
+    template["person_1"] = ("verb_right_1",)
+    template["verb_right_1"] = ("end",)
 
-    template["end"] = (".",)
+    template["person_2"] = ("verb_right_2",)
+    template["verb_right_2"] = ("property_2",)
+    template["property_2"] = ("end",)
+
+    template["property_3"] = ("adjective_3",)
+    template["adjective_3"] = ("end",)
+
+    template["adjective_4"] = ("property_4",)
+    template["property_4"] = ("end",)
+
+    # template["end"] = (".",)
 
     return template
 
@@ -37,15 +44,15 @@ def agree(w1, w2, t1, t2):
     cur_tags = re.findall(r"\w+", str(raw_cur_tags))
     next_tags = re.findall(r"\w+", str(raw_next_tags))
 
-    if t1 == "person":
-        if t2 == "verb_right":
-            if w2 in dative_verbs:
+    if t1[:-2] == "person":
+        if t2[:-2] == "verb_right":
+            if morph.normal_forms(w2)[0] in dative_verbs:
                 w1 = morph.parse(w1)[0].inflect({"datv"}).word
 
-    if t1 == "verb_right":
-        if t2 == "property":
+    if t1[:-2] == "verb_right":
+        if t2[:-2] == "property":
             pass
-        if t2 == "person":
+        if t2[:-2] == "person":
             if cur_tags[3] == "tran":
                 w2 = morph.parse(w2)[0].inflect({"accs"}).word
             else:
@@ -53,8 +60,8 @@ def agree(w1, w2, t1, t2):
             #gender
             w1 = morph.parse(w1)[0].inflect({next_tags[2]}).word
 
-    if t1 == "adjective":
-        if t2 == "property":
+    if t1[:-2] == "adjective":
+        if t2[:-2] == "property":
             #gender
             print("gender:")
 
@@ -67,10 +74,10 @@ def agree(w1, w2, t1, t2):
 
             w1 = morph.parse(w1)[0].inflect({gender}).word
 
-    if t1 == "property":
-        if t2 == "person":
+    if t1[:-2] == "property":
+        if t2[:-2] == "person":
             pass
-        if t2 == "adjective":
+        if t2[:-2] == "adjective":
             pass
 
 
@@ -143,7 +150,6 @@ def gen_words():
 
     return words
 
-'''
 template = gen_template()
 
 pickle.dump(template, open("template_v1.p", "wb"))
@@ -155,7 +161,7 @@ pickle.dump(words, open("words_v1.p", "wb"))
 
 template = pickle.load(open("template_v1.p", "rb"))
 words = pickle.load(open("words_v1.p", "rb"))
-
+'''
 
 
 for i in range(3):
