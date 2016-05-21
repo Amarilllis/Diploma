@@ -11,6 +11,10 @@ import re
 dative_verbs = set([u"нравиться", u"подарить", u"советовать", u"понравиться",
                     u"посоветовать", u"рекомендовать", u"порекомендовать"])
 
+stop_words = set([u"был", u"такой", u"сей", u"этот", u"данный", u"есть", u"сам"])
+
+ok_words = set(["start"])
+
 def gen_template():
     template = {}
 
@@ -25,16 +29,21 @@ def gen_template():
     template["property_2"] = ("end",)
 
     template["property_3"] = ("adjective_3",)
-    template["adjective_3"] = ("end",)
+    template["adjective_3"] = ("end", "end", "comma_0")
 
     template["adjective_4"] = ("property_4",)
-    template["property_4"] = ("end",)
+    template["property_4"] = ("end", "end", "comma_0")
+
+    template["comma_0"] = ("property_3","adjective_4")
 
     # template["end"] = (".",)
 
     return template
 
 def agree(w1, w2, t1, t2):
+    if t1 == "comma" or t2 == "comma":
+        return w1, w2
+
     morph = MorphAnalyzer()
     raw_cur_tags = morph.tag(w1)[-1]
     raw_next_tags = morph.tag(w1)[-1]
@@ -55,28 +64,36 @@ def agree(w1, w2, t1, t2):
                 w2 = morph.parse(w2)[0].inflect({"accs"}).word
             else:
                 w2 = morph.parse(w2)[0].inflect({"nomn"}).word
-            #gender
-            w1 = morph.parse(w1)[0].inflect({next_tags[2]}).word
+                #gender with nomn only
+                gender = next_tags[2]
+                if gender == "inan":
+                    gender = next_tags[3]
+                w1 = morph.parse(w1)[0].inflect({gender}).word
 
     if t1[:-2] == "adjective":
         if t2[:-2] == "property":
             #gender
-            print("gender:")
-
             gender = next_tags[2]
             if gender == "inan":
-                print("fuck)))")
-                print(w1, w2)
                 gender = next_tags[3]
-                print(gender)
-
-            w1 = morph.parse(w1)[0].inflect({gender}).word
+            try:
+                w1 = morph.parse(w1)[0].inflect({gender}).word
+            except Exception:
+                print("fuck")
+                print(w1, w2)
 
     if t1[:-2] == "property":
         if t2[:-2] == "person":
             pass
         if t2[:-2] == "adjective":
-            pass
+            gender = cur_tags[2]
+            if gender == "inan":
+                gender = cur_tags[3]
+            try:
+                w2 = morph.parse(w2)[0].inflect({gender}).word
+            except Exception:
+                print("fuck")
+                print(w1, w2)
 
 
     #w1 = morph.parse(w1)[0].inflect({}).word
@@ -87,9 +104,17 @@ def gen_review(template, words):
     types = []
 
     cur = random.choice(template["root"])
+    prev = ""
 
     while cur != "end":
-        word = random.choice(words[cur[:-2]])
+        expr = ""
+        while expr not in ok_words:
+            word = random.choice(words[cur[:-2]])
+            if prev == "" or prev == "," or cur == ",":
+                expr = "start"
+            else:
+                expr = prev + " " + cur
+
         review += [word]
         types += [cur]
         cur = random.choice(template[cur])
@@ -108,6 +133,7 @@ def gen_words():
 
     words["verb_right"] = []
     words["verb_left"] = []
+    words["comma"] = [","]
 
     words["property"] = [u"мощность", u"подошва",  u"резервуар",  u"пар", u"шнур",
             u"вес", u"ручка", u"кабель", u"накипь", u"парогенератор", u"утюг", u"утюг",
@@ -126,29 +152,31 @@ def gen_words():
 
                 raw_expr = l.findAll(text=True)
 
+                ok_words.add(raw_expr)
+
                 expr = raw_expr[0].split()
 
                 raw_gram = r.findAll(text=True)
 
                 gram = raw_gram[0].split()[-1]
 
-                # потом можно научиться добавлять биграммы, это сильно повысит точность и выигрыш перед ЦМ
-
                 if gram == u"[прилагательные]":
-                    words["adjective"].append(expr[-2]).decode("utf-8")
+                    if not expr[-2] in stop_words:
+                        words["adjective"].append(expr[-2]).decode("utf-8")
 
                 if gram == u"[левые_глаголы]":
-                    words["verb_left"].append(expr[-2]).decode("utf-8")
+                    if not expr[-2] in stop_words:
+                        words["verb_left"].append(expr[-2]).decode("utf-8")
 
                 if gram == u"[правые_глаголы]":
-                    words["verb_right"].append(expr[-1]).decode("utf-8")
+                    if not expr[-1] in stop_words:
+                        words["verb_right"].append(expr[-1]).decode("utf-8")
 
             except Exception:
                 continue
 
     return words
 
-'''
 template = gen_template()
 
 pickle.dump(template, open("template_v1.p", "wb"))
@@ -160,6 +188,7 @@ pickle.dump(words, open("words_v1.p", "wb"))
 
 template = pickle.load(open("template_v1.p", "rb"))
 words = pickle.load(open("words_v1.p", "rb"))
+'''
 
 for i in range(3):
     rev = gen_review(template, words)
