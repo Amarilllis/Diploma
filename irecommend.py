@@ -3,6 +3,7 @@ __author__ = 'amarilllis'
 import grab
 import pickle
 import pandas as pd
+from bs4 import BeautifulSoup
 
 def gather_models(url):
     g = grab.Grab()
@@ -32,7 +33,31 @@ def gather_reviews(url, proxy):
     return links
 
 def parse_review(url, df):
+    g = grab.Grab()
+    g.go(url)
+    page = g.response.body
+    soup = BeautifulSoup(page, "html.parser")
+
+    rating = soup.find_all("span", itemprop="ratingValue").contents[0]
+    text = soup.find_all("div", itemprop="reviewBody").contents[0]
+    try:
+        pro = soup.find_all("span", class_="plus").contents[0]
+        con = soup.find_all("span", class_="minus").contents[0]
+    except Exception:
+        pro = float('NaN')
+        con = float('NaN')
+    # time.sleep(120)
+    df.loc[len(df)] = [rating, text, pro, con]
+    print(rating)
+    print(text)
+    print(pro)
+    print(con)
+    return df
+
+def parse_review_grab_only(url, df):
     x_rating = "//*[@id=\"quicktabs_tabpage_12388_myreviewinfo\"]/div/div/div[3]/div/div[1]/span"
+
+    "//*[@id=\"quicktabs_tabpage_12388_myreviewinfo\"]/div/div/div[3]/div/div[1]/span"
 
     x_text = "//*[@id=\"quicktabs_tabpage_12388_myreviewinfo\"]/div/div/div[6]/div[1]/p"
 
@@ -41,13 +66,18 @@ def parse_review(url, df):
     x_con = "//*[@id=\"quicktabs_tabpage_12388_myreviewinfo\"]/div/div/div[5]/div[2]/span"
     g = grab.Grab()
     g.go(url)
+    page = g.request_body
+
 
     rating = g.doc.select(x_rating).text()
     text = " ".join(g.doc.select(x_text).text_list())
 
-    pro = g.doc.select(x_pro).text()
-    con = g.doc.select(x_con).text()
-
+    try:
+        pro = g.doc.select(x_pro).text()
+        con = g.doc.select(x_con).text()
+    except Exception:
+        pro = float('NaN')
+        con = float('NaN')
     # time.sleep(120)
     df.loc[len(df)] = [rating, text, pro, con]
     return df
@@ -68,7 +98,8 @@ print(model_links[0])
 import time
 import random
 
-df = pd.DataFrame(columns=["rating", "text", "pro", "con"])
+# df = pd.DataFrame(columns=["rating", "text", "pro", "con"])
+df = pd.from_csv("irecommend.csv", sep=',', encoding='utf-8')
 '''
 all_revs = []
 for i, model in enumerate(model_links):
@@ -92,17 +123,29 @@ for i, model in enumerate(model_links):
 pickle.dump(all_revs, open("irecommend_links_with_proxy.p", "wb"))
 '''
 
+
+parse_review("http://irecommend.ru/content/blizok-k-sovershenstvu", df)
+
 revlinks = pickle.load(open("irecommend_links_with_proxy.p", "rb"))
+used_links = set()
+
+'''
 for link in revlinks:
     print(link)
-    try:
+    if link in used_links:
+        continue
+    # try:
+    if True:
         df = parse_review(link, df)
         print(df.head())
-        df.to_csv("irecommend.csv", sep=',', encoding='utf-8')
-        print("success")
-    except Exception:
-        pass
-    break
-    time.sleep(random.randint(0, 60))
+        used_links.add(link)
+        df.to_csv("irecommend.csv", columns=["id", "rating", "text", "pro", "con"], index=False, sep=',', encoding='utf-8')
+        # print("success")
+    # except Exception:
+    #     pass
+    # break
+    time.sleep(random.randint(10, 60))
 
 df.to_csv("irecommend.csv", sep=',', encoding='utf-8')
+
+'''
