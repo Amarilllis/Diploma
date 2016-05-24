@@ -33,13 +33,16 @@ def gather_reviews(url, proxy):
     return links
 
 def parse_review(url, df):
+    print(df.head())
     g = grab.Grab()
     g.go(url)
     page = g.response.body
     soup = BeautifulSoup(page, "html.parser")
 
-    rating = soup.find_all("span", itemprop="ratingValue").contents[0]
-    text = soup.find_all("div", itemprop="reviewBody").contents[0]
+    rating = soup.find_all("span", itemprop="ratingValue")[0].contents[0]
+    rating = int(rating)
+    print(rating)#.contents[0]
+    text = soup.find_all("div", itemprop="reviewBody")[0].contents[0]
     try:
         pro = soup.find_all("span", class_="plus").contents[0]
         con = soup.find_all("span", class_="minus").contents[0]
@@ -99,7 +102,11 @@ import time
 import random
 
 # df = pd.DataFrame(columns=["rating", "text", "pro", "con"])
-df = pd.from_csv("irecommend.csv", sep=',', encoding='utf-8')
+df = pd.read_csv("irecommend.csv", sep=',', encoding='utf-8')
+
+# df.drop('Unnamed: 0', axis=1, inplace=True)
+
+print(list(df))
 '''
 all_revs = []
 for i, model in enumerate(model_links):
