@@ -41,7 +41,7 @@ def parse_review(url, df):
 
     rating = soup.find_all("span", itemprop="ratingValue")[0].contents[0]
     rating = int(rating)
-    print(rating)#.contents[0]
+    # print(rating)#.contents[0]
     text = soup.find_all("div", itemprop="reviewBody")[0].contents[0]
     try:
         pro = soup.find_all("span", class_="plus").contents[0]
@@ -104,9 +104,7 @@ import random
 # df = pd.DataFrame(columns=["rating", "text", "pro", "con"])
 df = pd.read_csv("irecommend.csv", sep=',', encoding='utf-8')
 
-# df.drop('Unnamed: 0', axis=1, inplace=True)
-
-print(list(df))
+# print(list(df))
 '''
 all_revs = []
 for i, model in enumerate(model_links):
@@ -131,7 +129,10 @@ pickle.dump(all_revs, open("irecommend_links_with_proxy.p", "wb"))
 '''
 
 
-parse_review("http://irecommend.ru/content/blizok-k-sovershenstvu", df)
+df = parse_review("http://irecommend.ru/content/blizok-k-sovershenstvu", df)
+
+print("df:")
+print(df.tail())
 
 revlinks = pickle.load(open("irecommend_links_with_proxy.p", "rb"))
 used_links = set()
