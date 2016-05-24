@@ -33,7 +33,7 @@ def gather_reviews(url, proxy):
     return links
 
 def parse_review(url, df):
-    print(df.head())
+    # print(df.head())
     g = grab.Grab()
     g.go(url)
     page = g.response.body
@@ -41,7 +41,7 @@ def parse_review(url, df):
 
     rating = soup.find_all("span", itemprop="ratingValue")[0].contents[0]
     rating = int(rating)
-    # print(rating)#.contents[0]
+
     text = soup.find_all("div", itemprop="reviewBody")[0].contents[0]
     try:
         pro = soup.find_all("span", class_="plus").contents[0]
@@ -49,7 +49,7 @@ def parse_review(url, df):
     except Exception:
         pro = float('NaN')
         con = float('NaN')
-    # time.sleep(120)
+    
     df.loc[len(df)] = [rating, text, pro, con]
     print(rating)
     print(text)
@@ -94,8 +94,9 @@ def get_all_models():
     pickle.dump(model_links, open("irecommend_models.p", "wb"))
 
 model_links = pickle.load(open("irecommend_models.p", "rb"))
-print(len(model_links))
-print(model_links[0])
+
+# print(len(model_links))
+# print(model_links[0])
 
 
 import time
@@ -134,10 +135,11 @@ df = parse_review("http://irecommend.ru/content/blizok-k-sovershenstvu", df)
 print("df:")
 print(df.tail())
 
+'''
 revlinks = pickle.load(open("irecommend_links_with_proxy.p", "rb"))
 used_links = set()
 
-'''
+
 for link in revlinks:
     print(link)
     if link in used_links:
@@ -151,7 +153,6 @@ for link in revlinks:
         # print("success")
     # except Exception:
     #     pass
-    # break
     time.sleep(random.randint(10, 60))
 
 df.to_csv("irecommend.csv", sep=',', encoding='utf-8')
